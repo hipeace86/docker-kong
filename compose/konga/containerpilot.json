@@ -1,0 +1,12 @@
+{
+  "consul": "consul:8500",
+  "services": [
+    {
+      "name": "konga-1337",
+      "port": 1337,
+      "health": "/usr/bin/curl -o /dev/null -s http://localhost:1337/",
+      "poll": 3,
+      "ttl": 10
+    }
+  ]
+}
