@@ -14,4 +14,4 @@ RUN apk add --no-cache curl && export CP_SHA1=e886899467ced6d7c76027d58c7f7554c2
 COPY containerpilot.json /etc/containerpilot.json
 ENV CONTAINERPILOT=file:///etc/containerpilot.json
 
-CMD /bin/containerpilot ./start.sh
+ENTRYPOINT ["/bin/containerpilot", "/bin/bash","./start.sh"]
