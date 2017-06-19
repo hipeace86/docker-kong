@@ -75,6 +75,7 @@ services:
 
     konga:
       build: konga/
+      restart: always
       links:
         - kong:kong
         - kong-database:kong-database
