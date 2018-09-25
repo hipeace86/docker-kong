@@ -1,7 +1,7 @@
 ##################################################################
 #              Docker Compose file that starts Kong              #
 ##################################################################
-version: '2'
+version: '2.1'
 
 services:
     # Load Balancing
@@ -45,7 +45,7 @@ services:
     # Kong Database
 
     kong-database:
-      image: postgres:9.4
+      image: postgres:9.6-alpine
       ports:
         - 5432
       expose:
@@ -53,12 +53,29 @@ services:
       environment:
         - POSTGRES_USER=kong
         - POSTGRES_DB=kong
+      healthcheck:
+        test: ["CMD", "pg_isready", "-U", "postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-    # Kong
+    kong-migration:
+      image: kong:0.14.1-alpine
+      depends_on:
+        kong-database:
+          condition: service_healthy
+      environment:
+        - KONG_DATABASE=postgres
+        - KONG_PG_HOST=kong-database
+      command: kong migrations up
+
 
     kong:
       build: kong/
       restart: always
+      depends_on:
+        kong-migration:
+          condition: service_started
       links:
         - kong-database:kong-database
         - consul
@@ -71,6 +88,10 @@ services:
       environment:
         - KONG_DATABASE=postgres
         - KONG_PG_HOST=kong-database
+      healthcheck:
+        test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
+        interval: 5s
+        retries: 10
 
     konga:
       build: konga/
